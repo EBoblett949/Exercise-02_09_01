@@ -64,10 +64,57 @@
         }
         // debug
         echo "\$internName: $internName";
+        $TableName = "assigned_opportunities";
+        if ($errors == 0) {
+            $SQLstring = "SELECT COUNT(opportunityID)" . " FROM $TableName" . " WHERE internID='$internID'" . " AND dateApproved IS NOT NULL";
+            $queryResult = mysqli_query($DBConnect, $SQLstring);
+            if (mysqli_num_rows($queryResult) > 0) {
+                $row = mysqli_fetch_row($queryResult);
+                $approvedOpportunities = $row[0];
+                mysqli_free_result($queryResult);
+            }
+
+            $selectedOpportunities = array();
+            $SQLstring = "SELECT opportunityID FROM $TableName" . " WHERE internID='$internID'";
+            $queryResult = mysqli_query($DBConnect, $SQLstring);
+            if (mysqli_num_rows($queryResult) > 0) {
+                while (($row = mysqli_fetch_row($queryResult)) != false) {
+                    $selectedOpportunities[] = $row[0];
+                }
+                mysqli_free_result($queryResult);
+            }
+
+            $assignedOpportunities = array();
+            $SQLstring = "SELECT opportunityID FROM $TableName" . " WHERE dateApproved IS NOT NULL";
+            $queryResult = mysqli_query($DBConnect, $SQLstring);
+            if (mysqli_num_rows($queryResult) > 0) {
+                while (($row = mysqli_fetch_row($queryResult)) != false) {
+                    $assignedOpportunities[] = $row[0];
+                }
+                mysqli_free_result($queryResult);
+            }
+
+            $TableName = "opportunities";
+            $opportunities = array();
+            $SQLstring = "SELECT opportunityID, company, city, startDate, endDate, position, description FROM $TableName";
+            $queryResult = mysqli_query($DBConnect, $SQLstring);
+            if (mysqli_num_rows($queryResult) > 0) {
+                while (($row = mysqli_fetch_assoc($queryResult)) != false) {
+                    $opportunities[] = $row;
+                }
+                mysqli_free_result($queryResult);
+            }
+            echo "<pre>\n";
+            print_r($opportunities);
+            echo "</pre>\n";
+        }
         if($DBConnect) {
             echo "<p>Closing database \"$DBName\" connection.</p>\n";
             mysqli_close($DBConnect);
         }
+        echo "<table border='1' width='100%'>\n";
+        echo "</table>\n";
+        echo "<p><a href='InternLogin.php'>Log Out</a></p>\n";
     ?>
 </body>
 </html>
