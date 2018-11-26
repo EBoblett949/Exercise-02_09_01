@@ -82,6 +82,17 @@
             }
             $TableName = "interns";
             if ($errors == 0) {
+                $SQLstring = "SELECT count(*) FROM $TableName" . " WHERE email='$email'";
+                $queryResult = mysqli_query($DBConnect, $SQLstring);
+                if ($queryResult) {
+                    $row = mysqli_fetch_row($queryResult);
+                    if ($row[0] > 0) {
+                        ++$errors;
+                        echo "<p>The email address entered (" . htmlentities($email) . ") is already registered.</p>\n";
+                    }
+                }
+            }
+            if ($errors == 0) {
                 $first = stripslashes($_POST['first']);
                 $last = stripslashes($_POST['last']);
                 $SQLstring = "INSERT INTO $TableName" . 
@@ -96,9 +107,20 @@
                 else {
                     $internID = mysqli_insert_id($DBConnect);
                 }   
-                echo "closing database \"$DBName\" connection.</p>\n";
-                mysqli_close($DBConnect);
             }
+        }
+        if ($errors == 0) {
+            $internName = $first . " " . $last;
+            echo "<p>Thank you $internName. ";
+            echo "Your new intern ID is <strong>$internID</strong>.</p>\n";
+        }
+        if ($DBConnect) {
+            echo "closing database \"$DBName\" connection.</p>\n";
+            mysqli_close($DBConnect);
+            echo "<form action='AvailableOpportunities.php' method='POST'>\n";
+            echo "<input type='hidden' name='internID' value='$internID'>\n";
+            echo "<input type='submit' name='submit' value='View Available Opportunities'>\n";
+            echo "</form>";
         }
         if ($errors > 0) {
             echo "<p>Please use your browsers BACK button to return to the form and fix the errors indicated</p>";
